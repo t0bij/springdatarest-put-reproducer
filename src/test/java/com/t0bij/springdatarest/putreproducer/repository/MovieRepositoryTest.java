@@ -72,6 +72,7 @@ public class MovieRepositoryTest {
     public void testGetMovieById() throws Exception {
         mockMvc.perform(get("/api/movies/1"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Inception"))
                 .andExpect(jsonPath("$.ratings").isArray())
                 .andExpect(jsonPath("$.ratings.length()").value(2))
@@ -88,16 +89,13 @@ public class MovieRepositoryTest {
     public void testUpdateMovieTitle() throws Exception {
         String updatedMovieJson = """
                 {
-                    "id": 1,
                     "name": "Inception - Update",
                     "ratings": [
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 1,
                             "score": 9
                         },
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 2,
                             "score": 8
                         }
@@ -116,10 +114,8 @@ public class MovieRepositoryTest {
                 .andExpect(jsonPath("$.name").value("Inception - Update"))
                 .andExpect(jsonPath("$.ratings").isArray())
                 .andExpect(jsonPath("$.ratings.length()").value(2))
-                .andExpect(jsonPath("$.ratings[0].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[0].ratingPlatformId").value(1))
                 .andExpect(jsonPath("$.ratings[0].score").value(9))
-                .andExpect(jsonPath("$.ratings[1].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[1].ratingPlatformId").value(2))
                 .andExpect(jsonPath("$.ratings[1].score").value(8));
 
@@ -130,16 +126,13 @@ public class MovieRepositoryTest {
     public void testChangeRatingsAndOrder() throws Exception {
         String updatedMovieJson = """
                 {
-                    "id": 1,
                     "name": "Inception",
                     "ratings": [
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 2,
                             "score": 2
                         },
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 1,
                             "score": 1
                         }
@@ -158,10 +151,8 @@ public class MovieRepositoryTest {
                 .andExpect(jsonPath("$.name").value("Inception"))
                 .andExpect(jsonPath("$.ratings").isArray())
                 .andExpect(jsonPath("$.ratings.length()").value(2))
-                .andExpect(jsonPath("$.ratings[0].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[0].ratingPlatformId").value(1))
                 .andExpect(jsonPath("$.ratings[0].score").value(1))
-                .andExpect(jsonPath("$.ratings[1].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[1].ratingPlatformId").value(2))
                 .andExpect(jsonPath("$.ratings[1].score").value(2));
 
@@ -172,7 +163,6 @@ public class MovieRepositoryTest {
     public void testDeleteAllRatings() throws Exception {
         String updatedMovieJson = """
                 {
-                    "id": 1,
                     "name": "Inception",
                     "ratings": [
                     ]
@@ -198,21 +188,17 @@ public class MovieRepositoryTest {
     public void testInsertNewRating() throws Exception {
         String updatedMovieJson = """
                 {
-                    "id": 1,
                     "name": "Inception",
                     "ratings": [
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 1,
                             "score": 9
                         },
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 3,
                             "score": 3
                         },
                         {
-                            "movieId": 1,
                             "ratingPlatformId": 2,
                             "score": 8
                         }
@@ -231,13 +217,10 @@ public class MovieRepositoryTest {
                 .andExpect(jsonPath("$.name").value("Inception"))
                 .andExpect(jsonPath("$.ratings").isArray())
                 .andExpect(jsonPath("$.ratings.length()").value(3))
-                .andExpect(jsonPath("$.ratings[0].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[0].ratingPlatformId").value(1))
                 .andExpect(jsonPath("$.ratings[0].score").value(9))
-                .andExpect(jsonPath("$.ratings[1].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[1].ratingPlatformId").value(2))
                 .andExpect(jsonPath("$.ratings[1].score").value(8))
-                .andExpect(jsonPath("$.ratings[2].movieId").value(1))
                 .andExpect(jsonPath("$.ratings[2].ratingPlatformId").value(3))
                 .andExpect(jsonPath("$.ratings[2].score").value(3));
 
@@ -248,16 +231,13 @@ public class MovieRepositoryTest {
     public void testInsertMultipleRatingsMiddle() throws Exception {
         String updatedMovieJson = """
                 {
-                    "id": 2,
                     "name": "The Dark Knight",
                     "ratings": [
                         {
-                            "movieId": 2,
                             "ratingPlatformId": 1,
                             "score": 10
                         },
                         {
-                            "movieId": 2,
                             "ratingPlatformId": 3,
                             "score": 3
                         }
@@ -272,21 +252,17 @@ public class MovieRepositoryTest {
 
         updatedMovieJson = """
                 {
-                    "id": 2,
                     "name": "The Dark Knight",
                     "ratings": [
                         {
-                            "movieId": 2,
                             "ratingPlatformId": 1,
                             "score": 10
                         },
                         {
-                            "movieId": 2,
                             "ratingPlatformId": 3,
                             "score": 3
                         },
                         {
-                            "movieId": 2,
                             "ratingPlatformId": 2,
                             "score": 2
                         }
@@ -305,13 +281,10 @@ public class MovieRepositoryTest {
                 .andExpect(jsonPath("$.name").value("The Dark Knight"))
                 .andExpect(jsonPath("$.ratings").isArray())
                 .andExpect(jsonPath("$.ratings.length()").value(3))
-                .andExpect(jsonPath("$.ratings[0].movieId").value(2))
                 .andExpect(jsonPath("$.ratings[0].ratingPlatformId").value(1))
                 .andExpect(jsonPath("$.ratings[0].score").value(10))
-                .andExpect(jsonPath("$.ratings[1].movieId").value(2))
                 .andExpect(jsonPath("$.ratings[1].ratingPlatformId").value(2))
                 .andExpect(jsonPath("$.ratings[1].score").value(2))
-                .andExpect(jsonPath("$.ratings[2].movieId").value(2))
                 .andExpect(jsonPath("$.ratings[2].ratingPlatformId").value(3))
                 .andExpect(jsonPath("$.ratings[2].score").value(3));
 

@@ -1,6 +1,7 @@
 package com.t0bij.springdatarest.putreproducer.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class Rating {
     @Id
     @Column(name = "movie_id", nullable = false)
     @EqualsAndHashCode.Include
+    @JsonIgnore
     private Long movieId;
 
     @Id
@@ -31,18 +33,5 @@ public class Rating {
     @JsonBackReference("movie-ratings")
     @ToString.Exclude
     private Movie movie;
-
-    public void setMovie(Movie movie) {
-        if (this.movie != movie) {
-            if (this.movie != null) {
-                this.movie.removeRating(this);
-            }
-            this.movie = movie;
-            if (this.movie != null) {
-                this.movie.addRating(this);
-                this.movieId = movie.getId();
-            }
-        }
-    }
 
 }

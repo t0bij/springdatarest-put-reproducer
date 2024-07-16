@@ -37,23 +37,7 @@ public class Movie {
 
     public void setRatings(Collection<Rating> ratings) {
         this.ratings.clear();
-        for (var rating : ratings) {
-            addRating(rating);
-        }
-    }
-
-    public void addRating(Rating rating) {
-        if (!ratings.containsValue(rating)) {
-            ratings.put(rating.getRatingPlatformId(), rating);
-            rating.setMovie(this);
-        }
-    }
-
-    public void removeRating(Rating rating) {
-        if (ratings.containsValue(rating)) {
-            ratings.remove(rating.getRatingPlatformId(), rating);
-            rating.setMovie(null);
-        }
+        ratings.forEach(rating -> this.ratings.put(rating.getRatingPlatformId(), rating));
     }
 
 }
