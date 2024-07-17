@@ -6,16 +6,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.PersistentEntityResource;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 public class MoviePutAspect {
-
-    @Autowired
-    private MovieRepository movieRepository;
 
     @Pointcut("execution(* org.springframework.data.rest.webmvc.RepositoryEntityController.putItemResource(..))")
     public void putItemResource() {
