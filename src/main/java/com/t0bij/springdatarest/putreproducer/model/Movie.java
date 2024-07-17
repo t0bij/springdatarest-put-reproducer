@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 @Entity
@@ -29,7 +29,7 @@ public class Movie {
     @JsonManagedReference("movie-ratings")
     @MapKey(name = "ratingPlatformId")
     @ToString.Exclude
-    private Map<Long, Rating> ratings = new LinkedHashMap<>();
+    private Map<Long, Rating> ratings = new HashMap<>();
 
     public Collection<Rating> getRatings() {
         return ratings.values();
