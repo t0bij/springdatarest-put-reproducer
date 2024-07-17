@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "movie")
@@ -27,17 +26,7 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("movie-ratings")
-    @MapKey(name = "ratingPlatformId")
     @ToString.Exclude
-    private Map<Long, Rating> ratings = new LinkedHashMap<>();
-
-    public Collection<Rating> getRatings() {
-        return ratings.values();
-    }
-
-    public void setRatings(Collection<Rating> ratings) {
-        this.ratings.clear();
-        ratings.forEach(rating -> this.ratings.put(rating.getRatingPlatformId(), rating));
-    }
+    private Set<Rating> ratings = new HashSet<>();
 
 }
