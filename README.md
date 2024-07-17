@@ -2,7 +2,7 @@
 
 ## Summary of the Problem
 
-The main entity `Movie` has a `OneToMany` relation to `Ratings`. `Ratings` has a composite primary key with `movieID` and `ratingId`. Only the `Movie` entity has a REST repository, and IDs are exposed. A single movie API exists where GET works fine, but updating via PUT doesn't. Updating the ratings list gives unexpected results. For example:
+The main entity `Movie` has a `OneToMany` relation to `Ratings`. `Ratings` has a composite primary key with `movieID` and `ratingPlatformId`. Only the `Movie` entity has a REST repository, and IDs are exposed. A single movie API exists where GET works fine, but updating via PUT doesn't. Updating the ratings list gives unexpected results. For example:
 
 **Before:**
 ```json
@@ -90,7 +90,7 @@ The only working setup is inspired by [AresEkb](https://github.com/AresEkb) from
  
 ## Tests
 
-Run the tests to ensure everything is working correctly:
+Run the tests with:
 ```sh
 mvn test
 ```
