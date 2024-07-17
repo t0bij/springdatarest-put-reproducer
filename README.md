@@ -49,9 +49,7 @@ The rating for ratingPlatformId 1 should be deleted, and a new one with ratingPl
 }
 ```
 
-I debugged a bit and ratingPlatformId is not considered at all during the PUT operation and gets skipped here as it is an ID:
-
-https://github.com/spring-projects/spring-data-rest/blob/aaadc344ab1bef4ed98cb0dbf6ca8ebd7c9262ff/spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/json/DomainObjectReader.java#L688-L690
+I debugged a bit and ratingPlatformId is not considered at all during the PUT operation and gets skipped [here](https://github.com/spring-projects/spring-data-rest/blob/aaadc344ab1bef4ed98cb0dbf6ca8ebd7c9262ff/spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/json/DomainObjectReader.java#L688-L690) as it is an ID.
 
 The only working setup is inspired by [AresEkb](https://github.com/AresEkb) from [this issue](https://github.com/spring-projects/spring-data-rest/issues/2324) and involves:
 
