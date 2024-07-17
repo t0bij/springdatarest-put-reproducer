@@ -228,6 +228,38 @@ public class MovieRepositoryTest {
     }
 
     @Test
+    public void testReplaceRating() throws Exception {
+        String updatedMovieJson = """
+                {
+                   "id": 2,
+                   "name": "The Dark Knight",
+                   "ratings": [
+                     {
+                       "ratingPlatformId": 2,
+                       "score": 2
+                     }
+                   ]
+                }
+                """;
+
+        mockMvc.perform(put("/api/movies/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updatedMovieJson))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/movies/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.name").value("The Dark Knight"))
+                .andExpect(jsonPath("$.ratings").isArray())
+                .andExpect(jsonPath("$.ratings.length()").value(1))
+                .andExpect(jsonPath("$.ratings[0].ratingPlatformId").value(2))
+                .andExpect(jsonPath("$.ratings[0].score").value(2));
+
+        assertSqlOperationCounts(1, 1, 0);
+    }
+
+    @Test
     public void testInsertMultipleRatingsMiddle() throws Exception {
         String updatedMovieJson = """
                 {
