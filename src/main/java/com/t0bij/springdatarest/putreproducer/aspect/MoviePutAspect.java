@@ -1,4 +1,4 @@
-package com.t0bij.springdatarest.putreproducer.repository;
+package com.t0bij.springdatarest.putreproducer.aspect;
 
 import com.t0bij.springdatarest.putreproducer.model.Movie;
 import com.t0bij.springdatarest.putreproducer.model.Rating;
