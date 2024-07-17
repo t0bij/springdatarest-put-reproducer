@@ -1,99 +1,69 @@
 # Spring Data REST - PUT Problem Reproducer
 
-This project is a reproducer for a Spring Data REST issue.
-
 ## Summary of the Problem
 
-When using Spring Data REST to manage entities with relationships, updates via PUT requests may not work as expected. Specifically, when updating a collection of related entities, the framework can mishandle the relationships. This reproducer demonstrates a workaround using a `Map` for the relation between `Movie` and `Rating`, and manually implementing methods like `setRatings` and `getRatings`. Normally, one would expect the framework to handle these relationships without such workarounds.
+The main entity `Movie` has a `OneToMany` relation to `Ratings`. `Ratings` has a composite primary key with `movieID` and `ratingPlatformId`. Only the `Movie` entity has a REST repository, and IDs are exposed. A single movie API exists where GET works fine, but updating via PUT doesn't. Updating the ratings list gives unexpected results. For example:
 
-## Project Setup
-
-### Entities
-
-#### Movie
-
-The `Movie` entity represents a film and contains the following fields:
-- `id`: Unique identifier for the movie.
-- `name`: The name of the movie.
-- `ratings`: A collection of ratings associated with the movie, mapped using a `Map<Long, Rating>`.
-
-#### Rating
-
-The `Rating` entity represents a rating given to a movie on a specific platform and contains the following fields:
-- `id`: Composite key consisting of `movieId` and `ratingPlatformId`.
-- `movie`: Reference to the associated movie.
-- `ratingPlatformId`: Identifier of the rating platform.
-- `score`: The rating score given to the movie.
-
-### Configuration
-
-- **Expose Entity IDs**: The `exposeIdsFor` configuration is activated for both entities.
-- **Single REST Repository**: Only one `RestRepository` exists for the `Movie` entity.
-
-### Usage
-
-The application provides REST endpoints to manage movies and their ratings. Here are some example endpoints:
-
-**Get Movie by ID**:
-```sh
-GET /api/movies/{id}
-```
-**Example Response**:
+**Before:**
 ```json
 {
-  "id": 2,
-  "name": "The Dark Knight",
-  "ratings": [
-    {
-      "movieId": 2,
-      "ratingPlatformId": 1,
-      "score": 10,
-      "_links": {
-        "movie": {
-          "href": "http://localhost:8080/api/movies/2"
-        }
+   "id": 2,
+   "name": "The Dark Knight",
+   "ratings": [
+      {
+         "ratingPlatformId": 1,
+         "score": 10
       }
-    }
-  ],
-  "_links": {
-    "self": {
-      "href": "http://localhost:8080/api/movies/2"
-    },
-    "movie": {
-      "href": "http://localhost:8080/api/movies/2"
-    }
-  }
+   ]
 }
 ```
 
-**Update Movie**:
-```sh
-PUT /api/movies/{id}
-```
-**Example Request**:
+**PUT Request:**
 ```json
 {
-  "id": 2,
-  "name": "The Dark Knight",
-  "ratings": [
-    {
-      "movieId": 2,
-      "ratingPlatformId": 1,
-      "score": 10
-    },
-    {
-      "movieId": 2,
-      "ratingPlatformId": 2,
-      "score": 2
-    }
-  ]
+   "id": 2,
+   "name": "The Dark Knight",
+   "ratings": [
+      {
+         "ratingPlatformId": 2,
+         "score": 2
+      }
+   ]
 }
 ```
 
-### Important Notes
+**Expectation:**
+The rating for ratingPlatformId 1 should be deleted, and a new one with ratingPlatformId 2 should be created.
 
-The solution involves using a `Map` for the relation between `Movie` and `Rating`, and implementing methods like `setRatings` and `getRatings` manually. This approach is based on a solution proposed by [AresEkb](https://github.com/AresEkb), discussed [here](https://github.com/spring-projects/spring-data-rest/issues/2324).
+**Actual Result:**
+```json
+{
+   "id": 2,
+   "name": "The Dark Knight",
+   "ratings": [
+      {
+         "ratingPlatformId": 1,
+         "score": 2
+      }
+   ]
+}
+```
 
+I debugged a bit and ratingPlatformId is not considered at all during the PUT operation and gets skipped [here](https://github.com/spring-projects/spring-data-rest/blob/aaadc344ab1bef4ed98cb0dbf6ca8ebd7c9262ff/spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/json/DomainObjectReader.java#L688-L690) as it is an ID.
+
+The only working setup is inspired by [AresEkb](https://github.com/AresEkb) from [this issue](https://github.com/spring-projects/spring-data-rest/issues/2324) and involves:
+
+- Using a `HashMap` for the `OneToMany` ratings and writing `getRatings` and `setRatings` methods manually.
+  https://github.com/t0bij/springdatarest-put-reproducer/blob/23b7ddcfe0545daa7496b54f979a6de048ad8df4/src/main/java/com/t0bij/springdatarest/putreproducer/model/Movie.java#L28-L41
+
+- Adding some AOP magic for `RepositoryEntityController.putItemResource` to set the movie in the ratings.
+  https://github.com/t0bij/springdatarest-put-reproducer/blob/23b7ddcfe0545daa7496b54f979a6de048ad8df4/src/main/java/com/t0bij/springdatarest/putreproducer/aspect/MoviePutAspect.java#L20-L32
+
+## Branches
+
+- [main](https://github.com/t0bij/springdatarest-put-reproducer): Working "solution" with `HashMap` and AOP workarounds.
+- [experimental/hash-set](https://github.com/t0bij/springdatarest-put-reproducer/tree/experimental/hash-set): Setup with `HashSet` and AOP, but adding list elements in the middle fails.
+- [experimental/plain](https://github.com/t0bij/springdatarest-put-reproducer/tree/experimental/plain): Setup with `HashSet` and without any AOP or workarounds; many tests fail.
 
 ## Installation
 
@@ -118,7 +88,7 @@ The solution involves using a `Map` for the relation between `Movie` and `Rating
  
 ## Tests
 
-Run the tests to ensure everything is working correctly:
+Run the tests with:
 ```sh
 mvn test
 ```
@@ -138,6 +108,10 @@ This test checks if changing the order of ratings in the request body is handled
 ### TestDeleteAllRatings
 
 This test ensures that all ratings of a movie can be deleted successfully.
+
+### TestReplaceRating
+
+This test verifies the replacement of a rating. So deleting a raing for one platform and adding a new one for another platform in the same put request.
 
 ### TestInsertNewRating
 
